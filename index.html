@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Focus</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:linear-gradient(135deg,#667eea,#764ba2);min-height:100vh;display:grid;place-items:center;color:#222}
+.card{width:min(92%,520px);background:white;border-radius:20px;padding:28px;box-shadow:0 20px 50px #0003}
+h1{margin:0 0 8px}.sub{color:#666;margin-top:0}
+.row{display:flex;gap:10px;margin:20px 0}.row input{flex:1;padding:13px;border:1px solid #ddd;border-radius:10px;font-size:16px}
+button{border:0;border-radius:10px;padding:12px 16px;cursor:pointer;background:#667eea;color:white;font-weight:bold}
+ul{padding:0;list-style:none}.task{display:flex;align-items:center;gap:10px;padding:12px;border:1px solid #eee;border-radius:10px;margin:8px 0}
+.task span{flex:1}.done{text-decoration:line-through;color:#999}.delete{background:#eee;color:#555;padding:7px 10px}
+.stats{margin-top:18px;color:#555;font-size:14px}
+</style>
+</head>
+<body>
+<div class="card">
+<h1>Daily Focus</h1>
+<p class="sub">A simple task tracker I built to stay organized.</p>
+<div class="row">
+<input id="taskInput" placeholder="Add a task..." />
+<button onclick="addTask()">Add</button>
+</div>
+<ul id="tasks"></ul>
+<div class="stats" id="stats"></div>
+</div>
+<script>
+let tasks=JSON.parse(localStorage.getItem("dailyFocusTasks")||"[]");
+function save(){localStorage.setItem("dailyFocusTasks",JSON.stringify(tasks));render();}
+function addTask(){
+ const input=document.getElementById("taskInput"), text=input.value.trim();
+ if(!text)return;
+ tasks.push({text,done:false}); input.value=""; save();
+}
+function toggle(i){tasks[i].done=!tasks[i].done;save();}
+function removeTask(i){tasks.splice(i,1);save();}
+function render(){
+ const list=document.getElementById("tasks");
+ list.innerHTML=tasks.map((t,i)=>`<li class="task"><input type="checkbox" ${t.done?"checked":""} onchange="toggle(${i})"><span class="${t.done?"done":""}">${escapeHtml(t.text)}</span><button class="delete" onclick="removeTask(${i})">Delete</button></li>`).join("");
+ const done=tasks.filter(t=>t.done).length;
+ document.getElementById("stats").textContent=`${done} of ${tasks.length} tasks completed`;
+}
+function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));}
+document.getElementById("taskInput").addEventListener("keydown",e=>{if(e.key==="Enter")addTask()});
+render();
+</script>
+</body>
+</html>
